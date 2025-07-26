@@ -1,14 +1,18 @@
-    import React from 'react'
-    import ReactDOM from 'react-dom/client'
-    import App from './App.jsx'
-    import './index.css'
-    
-    // Impor file SCSS utama kita
-    import './styles/main.scss'
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import { BrowserRouter } from 'react-router-dom';
+    import { AuthProvider } from './context/AuthProvider'; // Impor provider kita
+    import App from './App.jsx';
+    import './index.css';
+    import './styles/main.scss';
     
     ReactDOM.createRoot(document.getElementById('root')).render(
       <React.StrictMode>
-        <App />
+        <BrowserRouter>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </BrowserRouter>
       </React.StrictMode>,
-    )
+    );
     
