@@ -1,12 +1,12 @@
 // File: frontend/src/components/layout/Sidebar.jsx
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../../context/AuthProvider'; // Impor useAuth
+import { useAuth } from '../../context/AuthProvider';
 import styles from './Sidebar.module.scss';
 
 const Sidebar = () => {
-  const { user } = useAuth(); // Dapatkan data user yang sedang login
+  const { user } = useAuth();
 
-  // Tentukan apakah user adalah admin (SPV atau TL)
+  // Tentukan apakah user adalah admin (SPV atau TL) untuk menampilkan menu tertentu
   const isAdmin = user && (user.role.name === 'SPV' || user.role.name === 'TL');
 
   return (
@@ -24,13 +24,13 @@ const Sidebar = () => {
               Dasbor
             </NavLink>
           </li>
-          {/* Hanya tampilkan menu ini jika user adalah SPV atau TL */}
+          {/* Tampilkan menu-menu berikut hanya jika user adalah admin */}
           {isAdmin && (
             <>
               <li>
                 <NavLink 
                   to="/scorecards" 
-                  end
+                  end // 'end' prop penting agar tidak aktif saat di /scorecards/create
                   className={({ isActive }) => isActive ? styles.active : ''}
                 >
                   Daftar Scorecard
@@ -42,6 +42,14 @@ const Sidebar = () => {
                   className={({ isActive }) => isActive ? styles.active : ''}
                 >
                   Buat Scorecard
+                </NavLink>
+              </li>
+              <li>
+                <NavLink 
+                  to="/import/excel" 
+                  className={({ isActive }) => isActive ? styles.active : ''}
+                >
+                  Impor dari Excel
                 </NavLink>
               </li>
             </>
