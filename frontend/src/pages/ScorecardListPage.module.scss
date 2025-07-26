@@ -1,0 +1,72 @@
+.listPage {
+    h1 {
+    margin-bottom: 1.5rem;
+    }
+}
+
+.tableContainer {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    overflow-x: auto; // Agar tabel bisa di-scroll di layar kecil
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+    }
+
+    thead th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+    }
+
+    tbody tr:last-child td {
+    border-bottom: none;
+    }
+
+    tbody tr:hover {
+    background-color: #f1f3f5;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.actionButton {
+    padding: 0.25rem 0.75rem;
+    border: 1px solid #ced4da;
+    background-color: #ffffff;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    transition: background-color 0.2s;
+
+    &:hover {
+    background-color: #e9ecef;
+    }
+
+    &.edit {
+    color: #007bff;
+    border-color: #007bff;
+    &:hover { background-color: #007bff; color: white; }
+    }
+
+    &.delete {
+    color: #dc3545;
+    border-color: #dc3545;
+    &:hover { background-color: #dc3545; color: white; }
+    }
+}
+
+.error {
+    color: #dc3545;
+}
