@@ -7,10 +7,22 @@ use App\Http\Requests\StoreScorecardRequest;
 use App\Models\Scorecard;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class ScorecardController extends Controller
 {
+
+    public function index()
+    {
+        // Ambil semua scorecard, diurutkan dari yang terbaru.
+        // Gunakan `with()` untuk memuat relasi agent dan evaluator secara efisien.
+        $scorecards = Scorecard::with(['agent:id,name', 'evaluator:id,name'])
+                                ->latest('scorecard_date')
+                                ->paginate(15); // Menggunakan paginasi
+
+        return $scorecards;
+    }
     public function store(StoreScorecardRequest $request)
     {
         $validated = $request->validated();

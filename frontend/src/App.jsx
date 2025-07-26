@@ -5,7 +5,8 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
-import CreateScorecard from './pages/CreateScorecard'; // Impor halaman baru
+import CreateScorecard from './pages/CreateScorecard';
+import ScorecardListPage from './pages/ScorecardListPage'; // Impor halaman baru
 
 function App() {
   const { user, loading } = useAuth();
@@ -23,8 +24,9 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/scorecards/create" element={<CreateScorecard />} /> {/* Tambahkan route baru */}
-          <Route path="/scorecards" element={<div>Scorecards List Page</div>} /> 
+          <Route path="/scorecards/create" element={<CreateScorecard />} />
+          {/* Ganti placeholder dengan komponen yang sebenarnya */}
+          <Route path="/scorecards" element={<ScorecardListPage />} /> 
         </Route>
       </Route>
 

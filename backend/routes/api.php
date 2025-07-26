@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/users/agents', [UserController::class, 'getAgents']);
 
     // Route untuk menyimpan scorecard baru
+    Route::get('/scorecards', [ScorecardController::class, 'index']);
     Route::post('/scorecards', [ScorecardController::class, 'store']);
     // Route lain yang terlindungi akan ditambahkan di sini
 });
