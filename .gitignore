@@ -1,29 +1,29 @@
-    # Dependencies
-    /node_modules
-    /vendor
-    
-    # Laravel Files
-    /backend/bootstrap/cache/*.php
-    /backend/storage/framework/
-    /backend/storage/logs/
-    /backend/storage/app/public/
-    /backend/public/storage
-    Homestead.json
-    Homestead.yaml
-    npm-debug.log
-    yarn-error.log
-    
-    # Environment Files
-    .env
-    .env.backup
-    
-    # Frontend Build Files
-    /frontend/dist
-    /frontend/.DS_Store
-    
-    # IDE Helper Files
-    .idea
-    .vscode
-    _ide_helper.php
-    .phpstorm.meta.php
-    
+# Dependencies
+/node_modules
+/vendor
+
+# Laravel Files
+/backend/bootstrap/cache/*.php
+/backend/storage/framework/
+/backend/storage/logs/
+/backend/storage/app/public/
+/backend/public/storage
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+
+# Environment Files
+.env
+.env.backup
+.env.local 
+
+# Frontend Build Files
+/frontend/dist
+/frontend/.DS_Store
+
+# IDE Helper Files
+.idea
+.vscode
+_ide_helper.php
+.phpstorm.meta.php
