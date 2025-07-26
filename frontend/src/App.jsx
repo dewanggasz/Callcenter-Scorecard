@@ -4,7 +4,8 @@ import { useAuth } from './context/AuthProvider';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
-import MainLayout from './components/layout/MainLayout'; // Impor layout baru
+import MainLayout from './components/layout/MainLayout';
+import CreateScorecard from './pages/CreateScorecard'; // Impor halaman baru
 
 function App() {
   const { user, loading } = useAuth();
@@ -19,12 +20,11 @@ function App() {
       
       <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <Login />} />
       
-      {/* Grup rute terlindungi sekarang menggunakan MainLayout */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Rute /scorecards akan menjadi 404 untuk saat ini, tapi kita akan buat nanti */}
-          <Route path="/scorecards" element={<div>Scorecards Page</div>} /> 
+          <Route path="/scorecards/create" element={<CreateScorecard />} /> {/* Tambahkan route baru */}
+          <Route path="/scorecards" element={<div>Scorecards List Page</div>} /> 
         </Route>
       </Route>
 
