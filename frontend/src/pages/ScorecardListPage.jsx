@@ -6,16 +6,15 @@ import { useAuth } from '../context/AuthProvider';
 import styles from './ScorecardListPage.module.scss';
 
 const ScorecardListPage = () => {
-  const { user } = useAuth(); // Dapatkan data user yang sedang login
+  const { user } = useAuth();
   const [scorecards, setScorecards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  
-  // State untuk modal konfirmasi
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scorecardToDelete, setScorecardToDelete] = useState(null);
+  const [isExportingExcel, setIsExportingExcel] = useState(false);
+  const [isExportingPdf, setIsExportingPdf] = useState(false);
 
-  // Tentukan apakah user adalah admin (SPV atau TL)
   const isAdmin = user && (user.role.name === 'SPV' || user.role.name === 'TL');
 
   useEffect(() => {
@@ -23,7 +22,6 @@ const ScorecardListPage = () => {
         try {
             setLoading(true);
             const response = await apiClient.get('/scorecards');
-            // Akses array 'data' dari respons paginasi Laravel
             setScorecards(response.data.data); 
         } catch (err) {
             setError('Gagal mengambil data scorecard.');
@@ -35,36 +33,54 @@ const ScorecardListPage = () => {
     fetchScorecards();
   }, []);
 
-  // Fungsi untuk membuka modal konfirmasi
   const openDeleteModal = (id) => {
     setScorecardToDelete(id);
     setIsModalOpen(true);
   };
 
-  // Fungsi untuk menutup modal
   const closeDeleteModal = () => {
     setScorecardToDelete(null);
     setIsModalOpen(false);
   };
 
-  // Fungsi untuk mengkonfirmasi dan menjalankan proses hapus
   const handleConfirmDelete = async () => {
     if (!scorecardToDelete) return;
 
     try {
-      // Kirim request DELETE ke API
       await apiClient.delete(`/scorecards/${scorecardToDelete}`);
-      
-      // Update UI dengan menghapus item dari state, tanpa perlu refresh halaman
       setScorecards(prevScorecards => 
         prevScorecards.filter(s => s.id !== scorecardToDelete)
       );
     } catch (err) {
-      setError('Gagal menghapus scorecard. Silakan coba lagi.');
+      setError('Gagal menghapus scorecard.');
       console.error(err);
     } finally {
-      // Tutup modal setelah selesai
       closeDeleteModal();
+    }
+  };
+
+  const handleExport = async (format) => {
+    const isPdf = format === 'pdf';
+    if (isPdf) setIsExportingPdf(true);
+    else setIsExportingExcel(true);
+
+    try {
+      const response = await apiClient.get(`/export/${format}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `scorecards-${new Date().toISOString().split('T')[0]}.${format}`);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+    } catch (err) {
+      setError('Gagal mengekspor data.');
+      console.error(err);
+    } finally {
+      if (isPdf) setIsExportingPdf(false);
+      else setIsExportingExcel(false);
     }
   };
 
@@ -73,7 +89,6 @@ const ScorecardListPage = () => {
 
   return (
     <>
-      {/* Komponen Modal yang hanya akan tampil jika isModalOpen bernilai true */}
       <Modal
         isOpen={isModalOpen}
         onClose={closeDeleteModal}
@@ -84,7 +99,28 @@ const ScorecardListPage = () => {
       </Modal>
 
       <div className={styles.listPage}>
-        <h1>Daftar Scorecard</h1>
+        <div className={styles.header}>
+          <h1>Daftar Scorecard</h1>
+          {isAdmin && (
+            <div className={styles.exportActions}>
+              <button 
+                className={styles.exportButton} 
+                onClick={() => handleExport('excel')}
+                disabled={isExportingExcel}
+              >
+                {isExportingExcel ? 'Mengekspor...' : 'Export ke Excel'}
+              </button>
+              <button 
+                className={`${styles.exportButton} ${styles.pdfButton}`}
+                onClick={() => handleExport('pdf')}
+                disabled={isExportingPdf}
+              >
+                {isExportingPdf ? 'Mengekspor...' : 'Export ke PDF'}
+              </button>
+            </div>
+          )}
+        </div>
+        
         <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
