@@ -1,0 +1,34 @@
+.header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+
+      &__title h2 {
+        margin: 0;
+        font-size: 1.5rem;
+      }
+
+      &__user {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+    }
+
+    .logoutButton {
+      background: none;
+      border: 1px solid #dc3545;
+      color: #dc3545;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background-color: #dc3545;
+        color: white;
+      }
+    }

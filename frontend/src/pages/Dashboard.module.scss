@@ -1,0 +1,8 @@
+.dashboard {
+  &__grid {
+    display: grid;
+    /* Membuat kolom yang responsif */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+}
