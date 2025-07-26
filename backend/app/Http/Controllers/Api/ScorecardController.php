@@ -58,4 +58,16 @@ class ScorecardController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    public function destroy(Scorecard $scorecard)
+    {
+        // Di masa depan, kita bisa menambahkan otorisasi di sini
+        // untuk memastikan hanya user yang berhak yang bisa menghapus.
+        // Contoh: if (Auth::user()->cannot('delete', $scorecard)) { abort(403); }
+
+        $scorecard->delete();
+
+        // Kembalikan respons 204 No Content yang menandakan sukses
+        return response()->json(null, Response::HTTP_NO_CONTENT);
+    }
 }
