@@ -5,53 +5,77 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreScorecardRequest;
 use App\Models\Scorecard;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests; // <-- TAMBAHKAN BARIS INI
 
 class ScorecardController extends Controller
 {
+    use AuthorizesRequests; // <-- DAN TAMBAHKAN BARIS INI
 
+    /**
+     * Menampilkan daftar scorecard dengan filter berdasarkan peran.
+     */
     public function index()
     {
-        // Ambil semua scorecard, diurutkan dari yang terbaru.
-        // Gunakan `with()` untuk memuat relasi agent dan evaluator secara efisien.
-        $scorecards = Scorecard::with(['agent:id,name', 'evaluator:id,name'])
-                                ->latest('scorecard_date')
-                                ->paginate(15); // Menggunakan paginasi
+        $this->authorize('viewAny', Scorecard::class);
 
-        return $scorecards;
+        $user = Auth::user();
+        $query = Scorecard::with(['agent:id,name', 'evaluator:id,name'])->latest('scorecard_date');
+
+        // Terapkan filter berdasarkan peran pengguna
+        if ($user->role->name === 'TL') {
+            // Team Leader hanya melihat agent di dalam timnya
+            $query->whereHas('agent', function ($q) use ($user) {
+                $q->where('team_id', $user->team_id);
+            });
+        } elseif ($user->role->name === 'Agent') {
+            // Agent hanya melihat datanya sendiri
+            $query->where('agent_id', $user->id);
+        }
+        // SPV tidak perlu filter, bisa melihat semua
+
+        return $query->paginate(15);
     }
+
+    /**
+     * Menampilkan satu data scorecard spesifik beserta detailnya.
+     */
+    public function show(Scorecard $scorecard)
+    {
+        $this->authorize('view', $scorecard);
+        return $scorecard->load(['details.kpi', 'agent']);
+    }
+
+    /**
+     * Menyimpan scorecard baru ke database.
+     */
     public function store(StoreScorecardRequest $request)
     {
+        $this->authorize('create', Scorecard::class);
+        
         $validated = $request->validated();
 
         try {
-            // Gunakan transaksi database untuk memastikan integritas data
             $scorecard = DB::transaction(function () use ($validated) {
-                // 1. Buat record Scorecard utama
                 $scorecard = Scorecard::create([
                     'agent_id' => $validated['agent_id'],
                     'scorecard_date' => $validated['scorecard_date'],
                     'notes' => $validated['notes'] ?? null,
                     'evaluator_id' => Auth::id(),
-                    // overall_score bisa dihitung di sini jika perlu
                 ]);
-
-                // 2. Buat record ScorecardDetail untuk setiap KPI
                 $scorecard->details()->createMany($validated['details']);
-                
                 return $scorecard;
             });
 
             return response()->json([
                 'message' => 'Scorecard created successfully.',
-                'scorecard' => $scorecard->load('details') // Muat relasi untuk respons
+                'scorecard' => $scorecard->load('details')
             ], Response::HTTP_CREATED);
 
         } catch (\Exception $e) {
-            // Jika terjadi error, kembalikan respons error
             return response()->json([
                 'message' => 'Failed to create scorecard.',
                 'error' => $e->getMessage()
@@ -60,31 +84,21 @@ class ScorecardController extends Controller
     }
 
     /**
-     * Menampilkan satu data scorecard spesifik beserta detailnya.
-     */
-    public function show(Scorecard $scorecard)
-    {
-        // Muat relasi yang dibutuhkan oleh form edit
-        return $scorecard->load(['details.kpi', 'agent']);
-    }
-
-    /**
      * Memperbarui data scorecard yang ada.
      */
     public function update(StoreScorecardRequest $request, Scorecard $scorecard)
     {
+        $this->authorize('update', $scorecard);
+        
         $validated = $request->validated();
 
         try {
             DB::transaction(function () use ($validated, $scorecard) {
-                // 1. Update record Scorecard utama
                 $scorecard->update([
                     'agent_id' => $validated['agent_id'],
                     'scorecard_date' => $validated['scorecard_date'],
                     'notes' => $validated['notes'] ?? null,
                 ]);
-
-                // 2. Hapus detail lama dan buat yang baru (sinkronisasi)
                 $scorecard->details()->delete();
                 $scorecard->details()->createMany($validated['details']);
             });
@@ -102,15 +116,15 @@ class ScorecardController extends Controller
         }
     }
 
+    /**
+     * Menghapus scorecard dari database.
+     */
     public function destroy(Scorecard $scorecard)
     {
-        // Di masa depan, kita bisa menambahkan otorisasi di sini
-        // untuk memastikan hanya user yang berhak yang bisa menghapus.
-        // Contoh: if (Auth::user()->cannot('delete', $scorecard)) { abort(403); }
-
+        $this->authorize('delete', $scorecard);
+        
         $scorecard->delete();
 
-        // Kembalikan respons 204 No Content yang menandakan sukses
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }
