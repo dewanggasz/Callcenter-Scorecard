@@ -1,36 +1,23 @@
-import { useState } from 'react';
-    import apiClient from '../services/api'; // Impor instance Axios kita
-    import styles from './Login.module.scss'; // Impor SCSS module
+    import { useState } from 'react';
+    import { useAuth } from '../context/AuthProvider'; // Impor custom hook kita
+    import styles from './Login.module.scss';
     
     const Login = () => {
-      const [email, setEmail] = useState('');
-      const [password, setPassword] = useState('');
+      const [email, setEmail] = useState('spv@example.com'); // Default untuk kemudahan testing
+      const [password, setPassword] = useState('password'); // Default untuk kemudahan testing
       const [error, setError] = useState('');
-      const [loading, setLoading] = useState(false);
+      
+      // Ambil fungsi login dan state loading dari context
+      const { login, loading } = useAuth();
     
       const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError('');
     
-        try {
-          // Kirim request ke endpoint /login di backend
-          const response = await apiClient.post('/login', {
-            email,
-            password,
-          });
-          
-          // Jika berhasil, simpan token dan data user
-          console.log('Login successful:', response.data);
-          localStorage.setItem('auth_token', response.data.access_token);
-          
-          // Nanti kita akan redirect user ke dashboard
-          
-        } catch (err) {
-          console.error('Login failed:', err);
-          setError('Login failed. Please check your email and password.');
-        } finally {
-          setLoading(false);
+        const loginError = await login(email, password);
+    
+        if (loginError) {
+          setError(loginError);
         }
       };
     
@@ -74,3 +61,4 @@ import { useState } from 'react';
     };
     
     export default Login;
+    
