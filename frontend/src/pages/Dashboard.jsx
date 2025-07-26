@@ -1,31 +1,58 @@
+import { useState, useEffect } from 'react';
 import KpiCard from '../components/dashboard/KpiCard';
+import apiClient from '../services/api';
 import styles from './Dashboard.module.scss';
 
-// Data dummy untuk ditampilkan. Nanti ini akan datang dari API.
-const kpiData = [
-  { title: 'Handled Calls', value: '1,204' },
-  { title: 'Average Handling Time (AHT)', value: '4:32' },
-  { title: 'First Call Resolution (FCR)', value: '89%' },
-  { title: 'Quality Score', value: '95.5%' },
-  { title: 'CSAT', value: '92%' },
-  { title: 'Attendance', value: '98%' },
-];
-
 const Dashboard = () => {
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await apiClient.get('/dashboard');
+        setDashboardData(response.data);
+      } catch (err) {
+        setError('Failed to fetch dashboard data. Please try again later.');
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Array dependensi kosong, sehingga hanya berjalan sekali saat komponen dimuat
+
+  if (loading) {
+    return <div>Loading dashboard data...</div>;
+  }
+
+  if (error) {
+    return <div className={styles.error}>{error}</div>;
+  }
+
   return (
     <div className={styles.dashboard}>
-      <div className={styles.dashboard__grid}>
-        {kpiData.map((kpi, index) => (
-          <KpiCard 
-            key={index}
-            title={kpi.title}
-            value={kpi.value}
-            // Anda bisa menambahkan ikon di sini nanti
-            // icon={<i className="fas fa-phone"></i>} 
-          />
-        ))}
-      </div>
-      {/* Area untuk grafik atau tabel akan ditambahkan di sini nanti */}
+      {dashboardData && (
+        <>
+          <div className={styles.dashboard__grid}>
+            {dashboardData.kpis.map((kpi, index) => (
+              <KpiCard 
+                key={index}
+                title={kpi.title}
+                value={kpi.value}
+              />
+            ))}
+          </div>
+          <div className={styles.dashboard__chartArea}>
+            {/* Area untuk grafik, kita bisa tambahkan komponen Chart di sini nanti */}
+            <h3>Performance Trend</h3>
+            <p>Chart component will be placed here.</p>
+          </div>
+        </>
+      )}
     </div>
   );
 };
