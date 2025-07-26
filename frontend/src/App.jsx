@@ -6,7 +6,8 @@ import Dashboard from './pages/Dashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import MainLayout from './components/layout/MainLayout';
 import CreateScorecard from './pages/CreateScorecard';
-import ScorecardListPage from './pages/ScorecardListPage'; // Impor halaman baru
+import ScorecardListPage from './pages/ScorecardListPage';
+import EditScorecard from './pages/EditScorecard'; // Impor halaman Edit
 
 function App() {
   const { user, loading } = useAuth();
@@ -24,9 +25,10 @@ function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/scorecards/create" element={<CreateScorecard />} />
-          {/* Ganti placeholder dengan komponen yang sebenarnya */}
           <Route path="/scorecards" element={<ScorecardListPage />} /> 
+          <Route path="/scorecards/create" element={<CreateScorecard />} />
+          {/* Route baru untuk halaman edit dengan parameter ID */}
+          <Route path="/scorecards/:id/edit" element={<EditScorecard />} />
         </Route>
       </Route>
 

@@ -59,6 +59,49 @@ class ScorecardController extends Controller
         }
     }
 
+    /**
+     * Menampilkan satu data scorecard spesifik beserta detailnya.
+     */
+    public function show(Scorecard $scorecard)
+    {
+        // Muat relasi yang dibutuhkan oleh form edit
+        return $scorecard->load(['details.kpi', 'agent']);
+    }
+
+    /**
+     * Memperbarui data scorecard yang ada.
+     */
+    public function update(StoreScorecardRequest $request, Scorecard $scorecard)
+    {
+        $validated = $request->validated();
+
+        try {
+            DB::transaction(function () use ($validated, $scorecard) {
+                // 1. Update record Scorecard utama
+                $scorecard->update([
+                    'agent_id' => $validated['agent_id'],
+                    'scorecard_date' => $validated['scorecard_date'],
+                    'notes' => $validated['notes'] ?? null,
+                ]);
+
+                // 2. Hapus detail lama dan buat yang baru (sinkronisasi)
+                $scorecard->details()->delete();
+                $scorecard->details()->createMany($validated['details']);
+            });
+
+            return response()->json([
+                'message' => 'Scorecard updated successfully.',
+                'scorecard' => $scorecard->load('details')
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update scorecard.',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function destroy(Scorecard $scorecard)
     {
         // Di masa depan, kita bisa menambahkan otorisasi di sini
